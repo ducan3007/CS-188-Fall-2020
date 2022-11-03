@@ -1,6 +1,7 @@
 import queue
 import numpy as np
-
+import time
+start_time = time.time()
 
 '''
     Adjacency List Graph in python using a Dictionary.
@@ -52,6 +53,11 @@ class AdjacencyList:
         for key in self.list.keys():
             print("node", key, ": ", self.list[key])
 
+    '''
+        INPUT: Undirected Graph, Start Node - Target Node
+        OUTPUT: An array of nodes that is a shortest path from Start to Target
+    '''
+
     def BFS(self, START, TARGET):
 
         # START NODE DONT HAVE PARENT (mean it's root node)
@@ -61,8 +67,6 @@ class AdjacencyList:
 
         # queue is like []
         self.queue.put(START)
-        
-        
 
         self.visited.add(START)
 
@@ -100,7 +104,7 @@ class AdjacencyList:
         '''
             6 -> 4 (TARGET)
             parent {6->None, 2->6, 1->6, 0->2, 3->2, 5->2, 4->0}
-            
+
             Duyệt ngược từ TARGET -> START
             => parent[TARGET] -> parent[parent[TARGET]] -> parent[parent[parent[TARGET]]] -> ...
         '''
