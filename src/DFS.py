@@ -1,24 +1,54 @@
-from Graphs.adjacency_list import AdjacencyList
-from numpy import np
+class Graph:
+    def __init__(self, V):  # Constructor
+        self.V = V        # No. of vertices
+        self.adj = [[] for i in range(V)]  # adjacency lists
+        print('Init adjancency list: ', self.adj)
 
-'''
-    The DFS algorithm is a recursive algorithm that uses the idea of backtracking.
-    DFS is used to traverse a graph or tree data structure.
+    def addEdge(self, v, w):     # to add an edge to graph
+        self.adj[v].append(w)    # Add w to v’s list.
+
+    # prints all not yet visited vertices reachable from s
+    def DFS(self, s):            # prints all vertices in DFS manner from a given source.
+        # Initially mark all vertices as not visited
+        visited = [False for i in range(self.V)]
+
+        # Create a stack for DFS
+        stack = []
+
+        # Push the current source node.
+        stack.append(s)
+
+        while (len(stack)):
+            # Pop a vertex from stack and print it
+            s = stack[-1]
+            stack.pop()
+
+            # Stack may contain same vertex twice. So
+            # we need to print the popped item only
+            # if it is not visited.
+            if (not visited[s]):
+                print(s, end=' ')
+                visited[s] = True
+
+            # Get all adjacent vertices of the popped vertex s
+            # If a adjacent has not been visited, then push it
+            # to the stack.
+            for node in self.adj[s]:
+                if (not visited[node]):
+                    stack.append(node)
+
+    def print(self):
+        print(self.adj)
 
 
-ATTENTION
-    
-    Try to avoid using recursion as much as possible because it can be very memory intensive.
-    
-    Try not to fall into infinity loops by revisiting the same nodes over and over, that usually happen
-    with graphs which have cycles.
+# Driver program to test methods of graph class
+g = Graph(5)  # Total 5 vertices in graph
+g.addEdge(1, 0)
+g.addEdge(0, 2)
+g.addEdge(2, 1)
+g.addEdge(0, 3)
+g.addEdge(1, 4)
+g.print()
 
-'''
-
-
-class BFS:
-    def __init__(self, Grahp: AdjacencyList):
-        self.Graph = Grahp
-
-        self.path_found = False
-        self.par
+print("Following is Depth First Traversal")
+g.DFS(0)

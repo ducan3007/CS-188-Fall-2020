@@ -74,6 +74,63 @@ def tinyMazeSearch(problem):
     return [s, s, w, s, w, w, s, w]
 
 
+def commonSearch(problem, Fringe):
+    # Fringe (rìa) được hiểu là một cấu trúc dữ liệu, lưu trưu các node sẽ được duyệt (rìa - nằm ở rìa của cây tìm kiếm, các nút tiếp theo)
+    # Các node sẽ được thêm vào dần dần.
+    # Các Node có thể trùng lặp.
+    # Vậy dùng một [] để lưu các node đã duyệt, tránh việc lặp vô hạn
+    # Nếu node không trong [] thì ta thêm vào Fringe (push)
+    # Các phần tử trùng sẽ được loại bỏ (pop) dần dần khỏi Fringe
+    # khi Fringe rỗng thì thuật toán kết thúc.
+
+    # Lấy startState là tọa độ ban đầu của agent có dạng (x, y)
+    startState = problem.getStartState()
+
+    # Push startState vào fringe. StartState là vị trí ban đầu nên đường đi đến chính nó là một mảng rỗng.
+    Fringe.push((startState, []))
+
+    # Các state đã từng duyệt sẽ được lưu trong mảng visited, đảm bảo không duyệt lại.
+    visited = []
+
+    while not Fringe.isEmpty():
+        import time
+        # time.sleep(1)
+        # Xét state từ fringe
+
+        currentState, actionArr = Fringe.pop()
+
+        print('Visited: ', visited)
+        print('currentState: ', currentState)
+
+        # Nếu state hiện tại là goalState thì trả về đường dẫn tới nó.
+        if problem.isGoalState(currentState):
+            print('AAAAAAAAAAAAA: ', currentState)
+            return actionArr
+
+        # Nếu state hiện tại chưa duyệt thì đánh dấu là đã duyệt (thêm vào mảng visited)
+        # Đồng thời thêm các state liền kề với nó vào fringe.
+        # Ngược lại, sate đã duyệt sẽ được bỏ qua.
+
+        if currentState in visited:
+            print('-> VISITED: ', currentState)
+
+        if currentState not in visited:
+            # đánh dấu là đã duyệt
+            visited.append(currentState)
+
+            # từ đỉnh đó, lấy các đỉnh kề, (nhiều đỉnh kề)
+            successors = problem.getSuccessors(currentState)
+
+            for nextSate, action, cost in successors:
+                print('Add: ', nextSate)
+                # Đường đi từ startState đến nextState (successor) bằng tổng đường đi từ start đến current và current đến next
+                actionOfNextState = actionArr + [action]
+                Fringe.push((nextSate, actionOfNextState))
+
+    # Khi đã duyệt hết state mà không tìm được goalState thì trả về mảng trống
+    return []
+
+
 def depthFirstSearch(problem):
     """
     Search the deepest nodes in the search tree first.
@@ -84,28 +141,71 @@ def depthFirstSearch(problem):
     To get started, you might want to try some of these simple commands to
     understand the search problem that is being passed in:
 
-    print("Start:", problem.getStartState())
-    print("Is the start a goal?", problem.isGoalState(problem.getStartState()))
-    print("Start's successors:", problem.getSuccessors(problem.getStartState()))
+    In DFS, we use a stack data structure to store the fringe.
+
+
+    Trong DFS, Fringe là một Stack (LIFO).
+    Các Node vào trước sẽ được duyệt sau cùng.
+
     """
+
     "*** YOUR CODE HERE ***"
-    print('Problem: \n',problem.walls)
-    print("Start:", problem.getStartState())
-    print("Is the start a goal?", problem.isGoalState(problem.getStartState()))
-    print("Start's successors:", problem.getSuccessors(problem.getStartState()))
-    util.raiseNotDefined()
+
+    stack = util.Stack()
+    return commonSearch(problem, stack)
 
 
 def breadthFirstSearch(problem):
-    """Search the shallowest nodes in the search tree first."""
+    """Search the shallowest nodes in the search tree first.
+
+    Trong BFS, Fringe là một Queue (FIFO).
+    Node nào vào trước sẽ được duyệt trước.
+
+
+    """
+
     "*** YOUR CODE HERE ***"
-    util.raiseNotDefined()
+    queue = util.Queue()
+
+    return commonSearch(problem, queue)
 
 
 def uniformCostSearch(problem):
-    """Search the node of least total cost first."""
-    "*** YOUR CODE HERE ***"
-    util.raiseNotDefined()
+
+    fringe = util.PriorityQueue()
+    startState = problem.getStartState()
+
+    priority = dict()
+
+    fringe.push((startState, []), problem.getCostOfActions([]))
+    po = []
+    po.append([(startState, []), problem.getCostOfActions([])])
+    visited = []
+
+    while not fringe.isEmpty():
+        import time
+
+        print('====== Priority ======')
+
+        currentState, actionArr = fringe.pop()
+
+        if currentState in visited:
+            print('-> VISITED: ', currentState)
+
+        if problem.isGoalState(currentState):
+            return actionArr
+
+        if currentState not in visited:
+            visited.append(currentState)
+            for nextSate, action, cost in problem.getSuccessors(currentState):
+                actionOfNextState = actionArr + [action]
+                fringe.push((nextSate, actionOfNextState), problem.getCostOfActions(actionOfNextState))
+
+                # print('Add: ', currentState, nextSate, problem.getCostOfActions(actionOfNextState))
+
+                po.append([(nextSate, actionOfNextState), problem.getCostOfActions(actionOfNextState)])
+
+    return []
 
 
 def nullHeuristic(state, problem=None):
@@ -117,9 +217,56 @@ def nullHeuristic(state, problem=None):
 
 
 def aStarSearch(problem, heuristic=nullHeuristic):
-    """Search the node that has the lowest combined cost and heuristic first."""
-    "*** YOUR CODE HERE ***"
-    util.raiseNotDefined()
+   # Chi phí cost của A* được tính bởi chi phí từ startState tới state hiện tại cộng với chi phí dự
+   # đoán từ state hiện tại tới goalState.
+    fringe = util.PriorityQueue()
+    startState = problem.getStartState()
+
+    """ 
+     Sử dụng hàm getCostOfActions để tính chi phí dựa trên Actions từ startState đến state hiện tại.
+
+     Sử dụng heuristic(state, problem) để tính chi phí dự đoán tới goalState.
+
+     Chi phí dự đoán được tính như sau: 
+     + tọa độ hiện tại : (x1, y1)
+     + tọa độ đích: (x2, y2)
+
+     => Chi phí dự đoán = |x1 - x2| + |y1 - y2| ( công thức Manhattan Distance)
+     
+    """
+    fringe.push((startState, []), problem.getCostOfActions([]) + heuristic(startState, problem))
+
+    # Các state đã từng duyệt sẽ được lưu trong mảng visited.
+    visited = []
+
+    while not fringe.isEmpty():
+        import time
+
+        # Lấy ra state với chi phí thấp nhất.
+        currentState, actionArr = fringe.pop()
+
+        # Nếu state hiện tại là goalState thì trả về đường dẫn tới nó.
+        if problem.isGoalState(currentState):
+            return actionArr
+
+        # Nếu state hiện tại chưa duyệt thì đánh dấu là đã duyệt (thêm vào mảng visited)
+        # Đồng thời thêm các state liền kề với nó vào fringe.
+
+        print('fn', heuristic)
+
+        if currentState not in visited:
+            visited.append(currentState)
+
+            for nextState, action, cost in problem.getSuccessors(currentState):
+                actionOfNextState = actionArr + [action]
+
+                print('Heuristic: ', nextState, heuristic(nextState, problem))
+
+                fringe.push((nextState, actionOfNextState), problem.getCostOfActions(
+                    actionOfNextState) + heuristic(nextState, problem))
+
+    # Khi đã duyệt hết state mà không tìm được goalState thì trả về mảng trống
+    return []
 
 
 # Abbreviations

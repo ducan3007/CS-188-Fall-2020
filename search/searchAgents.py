@@ -175,6 +175,9 @@ class PositionSearchProblem(search.SearchProblem):
     def getStartState(self):
         return self.startState
 
+    def getGoalState(self):
+        return self.goal
+
     def isGoalState(self, state):
         isGoal = state == self.goal
 

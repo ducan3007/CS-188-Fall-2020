@@ -81,8 +81,8 @@ class AdjacencyList:
 
             for (node, weight) in self.list[current_node]:
 
-                print('current_node: ', current_node, '| node: ', node, '| visited: ', self.visited, '| queue: ',
-                      self.queue.queue, "| parent", self.parents)
+                # print('current_node: ', current_node, '| node: ', node, '| visited: ', self.visited, '| queue: ',
+                    #   self.queue.queue, "| parent", self.parents)
 
                 # check if the node has been visited
                 if node not in self.visited:
