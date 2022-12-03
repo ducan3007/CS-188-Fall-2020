@@ -164,30 +164,35 @@ def breadthFirstSearch(problem):
 
     """
 
-    "*** YOUR CODE HERE ***"
     queue = util.Queue()
 
     return commonSearch(problem, queue)
 
 
 def uniformCostSearch(problem):
-
-    fringe = util.PriorityQueue()
-    startState = problem.getStartState()
-
+    # biến để log
+    po = []
     priority = dict()
 
-    fringe.push((startState, []), problem.getCostOfActions([]))
-    po = []
+    '''
+    Cấu trúc dữ liệu chính là một PriorityQueue.
+    Mỗi phần tử trong PriorityQueue là một tuple ((node, actions[ from node to startState ]), actionsCost)
+    '''
+
+    prorityQueue = util.PriorityQueue()
+
+    startState = problem.getStartState()
+    prorityQueue.push((startState, []), problem.getCostOfActions([]))
+
     po.append([(startState, []), problem.getCostOfActions([])])
     visited = []
 
-    while not fringe.isEmpty():
-        import time
-
-        print('====== Priority ======')
-
-        currentState, actionArr = fringe.pop()
+    while not prorityQueue.isEmpty():
+        '''
+            B1: Lấy state và actions có độ ưu tiên cao nhất 
+            mảng actions chính là output của thuật toán cho dugf có  
+        '''
+        currentState, actionArr = prorityQueue.pop()
 
         if currentState in visited:
             print('-> VISITED: ', currentState)
@@ -199,7 +204,7 @@ def uniformCostSearch(problem):
             visited.append(currentState)
             for nextSate, action, cost in problem.getSuccessors(currentState):
                 actionOfNextState = actionArr + [action]
-                fringe.push((nextSate, actionOfNextState), problem.getCostOfActions(actionOfNextState))
+                prorityQueue.push((nextSate, actionOfNextState), problem.getCostOfActions(actionOfNextState))
 
                 # print('Add: ', currentState, nextSate, problem.getCostOfActions(actionOfNextState))
 
@@ -231,7 +236,8 @@ def aStarSearch(problem, heuristic=nullHeuristic):
      + tọa độ hiện tại : (x1, y1)
      + tọa độ đích: (x2, y2)
 
-     => Chi phí dự đoán = |x1 - x2| + |y1 - y2| ( công thức Manhattan Distance)
+     => Chi phí dự đoán là đường thắng nối giữa 2 điểm:
+        => cost =  |x1 - x2| + |y1 - y2| ( công thức Manhattan Distance)
      
     """
     fringe.push((startState, []), problem.getCostOfActions([]) + heuristic(startState, problem))
