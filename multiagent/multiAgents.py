@@ -256,9 +256,9 @@ class AlphaBetaAgent(MultiAgentSearchAgent):
         Returns the minimax action using self.depth and self.evaluationFunction
         """
         "*** YOUR CODE HERE ***"
-        value = -100000.0
-        alpha = -100000.0
-        beta = 100000.0
+        value = -float('inf')
+        alpha = -float('inf')
+        beta = float('inf')
         PacmanAction = Directions.STOP
         # Duyệt để tính điểm cho toàn bộ các hướng đi (action).
         # Với trường hợp này, ta lựa chọn hướng đi có điểm cao nhất (max).
@@ -287,7 +287,7 @@ class AlphaBetaAgent(MultiAgentSearchAgent):
             return self.GhostValue(gameState, currentDepth, agentIndex, alpha, beta)
 
     def PacmanValue(self, gameState, currentDepth, alpha, beta):
-        vmax = -100000.0
+        vmax = -float('inf')
         for action in gameState.getLegalActions(0):
             vmax = max(vmax, self.getValue(gameState.generateSuccessor(0, action), currentDepth, 1, alpha, beta))
             if vmax > beta:
@@ -296,7 +296,7 @@ class AlphaBetaAgent(MultiAgentSearchAgent):
         return vmax
 
     def GhostValue(self, gameState, currentDepth, agentIndex, alpha, beta):
-        vmin = 100000.0
+        vmin = float('inf')
         if agentIndex == gameState.getNumAgents() - 1:
             depth = currentDepth + 1
             index = 0
@@ -324,7 +324,7 @@ class ExpectimaxAgent(MultiAgentSearchAgent):
         legal moves.
         """
         "*** YOUR CODE HERE ***"
-        PacmanValue = -100000.0
+        PacmanValue = -float('inf')
         PacmanAction = Directions.STOP
 
         for action in gameState.getLegalActions(0):
@@ -349,7 +349,7 @@ class ExpectimaxAgent(MultiAgentSearchAgent):
             return self.GhostValue(gameState, currentDepth, agentIndex)
 
     def PacmanValue(self, gameState, currentDepth):
-        PacmanValue = -100000.0
+        PacmanValue = -float('inf')
         for action in gameState.getLegalActions(0):
             PacmanValue = max(PacmanValue, self.getValue(gameState.generateSuccessor(0, action), currentDepth, 1))
         return PacmanValue
@@ -362,6 +362,7 @@ class ExpectimaxAgent(MultiAgentSearchAgent):
             else:
                 GhostValue += self.getValue(gameState.generateSuccessor(agentIndex, action), currentDepth,
                                             agentIndex + 1)
+        #trả về giá trị trung bình của các node con
         return GhostValue / len(gameState.getLegalActions(agentIndex))
 
 
@@ -377,7 +378,10 @@ def betterEvaluationFunction(currentGameState):
     newPos = currentGameState.getPacmanPosition()
     newFood = currentGameState.getFood()
     # print("new_food:", newFood)
+
+    # trạng thái mới của con ma
     newGhostStates = currentGameState.getGhostStates()
+    # newScaredTimes là thời gian sợ hãi còn lại của các con ma.
     newScaredTimes = [ghostState.scaredTimer for ghostState in newGhostStates]
 
     "*** YOUR CODE HERE ***"
