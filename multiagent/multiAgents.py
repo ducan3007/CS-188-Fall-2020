@@ -279,22 +279,24 @@ class AlphaBetaAgent(MultiAgentSearchAgent):
             return self.evaluationFunction(gameState)
 
         elif agentIndex == 0:
+            # Đối với agentIndex = 0, ta trả về giá trị của hàm PacmanValue đưa ra hướng đi có điểm cao nhất (max).
             return self.PacmanValue(gameState, currentDepth, alpha, beta)
 
         else:
+            # Đối với agentIndex > 0, ta trả về giá trị của hàm GhostValue đưa ra hướng đi có điểm thấp nhất (min).
             return self.GhostValue(gameState, currentDepth, agentIndex, alpha, beta)
 
     def PacmanValue(self, gameState, currentDepth, alpha, beta):
-        value = -100000.0
+        vmax = -100000.0
         for action in gameState.getLegalActions(0):
-            value = max(value, self.getValue(gameState.generateSuccessor(0, action), currentDepth, 1, alpha, beta))
-            if value > beta:
-                return value
-            alpha = max(value, alpha)
-        return value
+            vmax = max(vmax, self.getValue(gameState.generateSuccessor(0, action), currentDepth, 1, alpha, beta))
+            if vmax > beta:
+                return vmax
+            alpha = max(vmax, alpha)
+        return vmax
 
     def GhostValue(self, gameState, currentDepth, agentIndex, alpha, beta):
-        value = 100000.0
+        vmin = 100000.0
         if agentIndex == gameState.getNumAgents() - 1:
             depth = currentDepth + 1
             index = 0
@@ -302,12 +304,11 @@ class AlphaBetaAgent(MultiAgentSearchAgent):
             depth = currentDepth
             index = agentIndex + 1
         for action in gameState.getLegalActions(agentIndex):
-            value = min(value,
-                        self.getValue(gameState.generateSuccessor(agentIndex, action), depth, index, alpha, beta))
-            if value < alpha:
-                return value
-            beta = min(value, beta)
-        return value
+            vmin = min(vmin, self.getValue(gameState.generateSuccessor(agentIndex, action), depth, index, alpha, beta))
+            if vmin < alpha:
+                return vmin
+            beta = min(vmin, beta)
+        return vmin
 
 
 class ExpectimaxAgent(MultiAgentSearchAgent):
