@@ -206,44 +206,44 @@ class MinimaxAgent(MultiAgentSearchAgent):
         Returns whether or not the game state is a losing state
         """
         "*** YOUR CODE HERE ***"
-        bestAction, socore = minimax(self, gameState, 0, 0)
+        bestAction, socore = self.minimax(self, gameState, 0, 0)
         return bestAction
 
 
 
-def minimax(self, gameState, agentIndex, depth):
-    bestAction = None
-    # Kiểm tra điều kiện dừng của thuật toán.
-    if gameState.isLose() or gameState.isWin() or depth >= self.depth:
-        return bestAction, self.evaluationFunction(gameState)
-    score = 99999
-    if agentIndex == 0:
-        score = -99999
+    def minimax(self, gameState, agentIndex, depth):
+       bestAction = None
+       # Kiểm tra điều kiện dừng của thuật toán.
+       if gameState.isLose() or gameState.isWin() or depth >= self.depth:
+           return bestAction, self.evaluationFunction(gameState)
+       score = 99999
+       if agentIndex == 0:
+           score = -99999
 
-    # Lấy toàn bộ hướng đi hiện tại của agent
-    actions = gameState.getLegalActions(agentIndex)
-    # Duyệt để tính điểm cho toàn bộ các hướng đi (action).
-    # Đối với Pacman có agentIndex = 0, ta lựa chọn hướng đi có điểm cao nhất (max).
-    # Đối với Ghost có agentIndex > 0, ta lựa chọn hướng đi có điểm thấp nhất (min).
-    for action in actions:
-        nextState = gameState.generateSuccessor(agentIndex, action)
-        if agentIndex == 0:  # Pac man - max agent
-            nextAction, nextScore = minimax(self, nextState, agentIndex + 1, depth)
-            if nextScore > score:
-                score = nextScore
-                bestAction = action
-        else:
-            if agentIndex == gameState.getNumAgents() - 1:
-                nextAgentIndex = 0
-                nextDepth = depth + 1
-            else:
-                nextAgentIndex = agentIndex + 1
-                nextDepth = depth
-            nextAction, nextScore = minimax(self, nextState, nextAgentIndex, nextDepth)
-            if nextScore < score:
-                score = nextScore
-                bestAction = action
-    return bestAction, score
+       # Lấy toàn bộ hướng đi hiện tại của agent
+       actions = gameState.getLegalActions(agentIndex)
+       # Duyệt để tính điểm cho toàn bộ các hướng đi (action).
+       # Đối với Pacman có agentIndex = 0, ta lựa chọn hướng đi có điểm cao nhất (max).
+       # Đối với Ghost có agentIndex > 0, ta lựa chọn hướng đi có điểm thấp nhất (min).
+       for action in actions:
+           nextState = gameState.generateSuccessor(agentIndex, action)
+           if agentIndex == 0:  # Pac man - max agent
+               nextAction, nextScore = self.minimax(self, nextState, agentIndex + 1, depth)
+               if nextScore > score:
+                   score = nextScore
+                   bestAction = action
+           else:
+               if agentIndex == gameState.getNumAgents() - 1:
+                   nextAgentIndex = 0
+                   nextDepth = depth + 1
+               else:
+                   nextAgentIndex = agentIndex + 1
+                   nextDepth = depth
+               nextAction, nextScore = self.minimax(self, nextState, nextAgentIndex, nextDepth)
+               if nextScore < score:
+                   score = nextScore
+                   bestAction = action
+       return bestAction, score
 
 
 class AlphaBetaAgent(MultiAgentSearchAgent):
@@ -256,7 +256,58 @@ class AlphaBetaAgent(MultiAgentSearchAgent):
         Returns the minimax action using self.depth and self.evaluationFunction
         """
         "*** YOUR CODE HERE ***"
-        util.raiseNotDefined()
+        value = -100000.0
+        alpha = -100000.0
+        beta = 100000.0
+        PacmanAction = Directions.STOP
+        # Duyệt để tính điểm cho toàn bộ các hướng đi (action).
+        # Với trường hợp này, ta lựa chọn hướng đi có điểm cao nhất (max).
+        actions = gameState.getLegalActions(0)
+        for action in actions:
+            nextState = gameState.generateSuccessor(0, action)
+            value = max(value, self.getValue(nextState, 0, 1, alpha, beta))
+
+            if value > alpha:
+                alpha = value
+                PacmanAction = action
+
+        return PacmanAction
+
+    def getValue(self, gameState, currentDepth, agentIndex, alpha, beta):
+        # Kiểm tra điều kiện dừng của thuật toán.
+        if currentDepth == self.depth or gameState.isWin() or gameState.isLose():
+            return self.evaluationFunction(gameState)
+
+        elif agentIndex == 0:
+            return self.PacmanValue(gameState, currentDepth, alpha, beta)
+
+        else:
+            return self.GhostValue(gameState, currentDepth, agentIndex, alpha, beta)
+
+    def PacmanValue(self, gameState, currentDepth, alpha, beta):
+        value = -100000.0
+        for action in gameState.getLegalActions(0):
+            value = max(value, self.getValue(gameState.generateSuccessor(0, action), currentDepth, 1, alpha, beta))
+            if value > beta:
+                return value
+            alpha = max(value, alpha)
+        return value
+
+    def GhostValue(self, gameState, currentDepth, agentIndex, alpha, beta):
+        value = 100000.0
+        if agentIndex == gameState.getNumAgents() - 1:
+            depth = currentDepth + 1
+            index = 0
+        else:
+            depth = currentDepth
+            index = agentIndex + 1
+        for action in gameState.getLegalActions(agentIndex):
+            value = min(value,
+                        self.getValue(gameState.generateSuccessor(agentIndex, action), depth, index, alpha, beta))
+            if value < alpha:
+                return value
+            beta = min(value, beta)
+        return value
 
 
 class ExpectimaxAgent(MultiAgentSearchAgent):
@@ -272,7 +323,45 @@ class ExpectimaxAgent(MultiAgentSearchAgent):
         legal moves.
         """
         "*** YOUR CODE HERE ***"
-        util.raiseNotDefined()
+        PacmanValue = -100000.0
+        PacmanAction = Directions.STOP
+
+        for action in gameState.getLegalActions(0):
+            nextState = gameState.generateSuccessor(0, action)
+            nextValue = self.getValue(nextState, 0, 1)
+
+            if nextValue > PacmanValue:
+                PacmanValue = nextValue
+                PacmanAction = action
+        return PacmanAction
+
+    def getValue(self, gameState, currentDepth, agentIndex):
+
+        if currentDepth == self.depth or gameState.isWin() or gameState.isLose():
+            value = self.evaluationFunction(gameState)
+            return self.evaluationFunction(gameState)
+
+        elif agentIndex == 0:
+            return self.PacmanValue(gameState, currentDepth)
+
+        else:
+            return self.GhostValue(gameState, currentDepth, agentIndex)
+
+    def PacmanValue(self, gameState, currentDepth):
+        PacmanValue = -100000.0
+        for action in gameState.getLegalActions(0):
+            PacmanValue = max(PacmanValue, self.getValue(gameState.generateSuccessor(0, action), currentDepth, 1))
+        return PacmanValue
+
+    def GhostValue(self, gameState, currentDepth, agentIndex):
+        GhostValue = 0
+        for action in gameState.getLegalActions(agentIndex):
+            if agentIndex == gameState.getNumAgents() - 1:
+                GhostValue += self.getValue(gameState.generateSuccessor(agentIndex, action), currentDepth + 1, 0)
+            else:
+                GhostValue += self.getValue(gameState.generateSuccessor(agentIndex, action), currentDepth,
+                                            agentIndex + 1)
+        return GhostValue / len(gameState.getLegalActions(agentIndex))
 
 
 def betterEvaluationFunction(currentGameState):
