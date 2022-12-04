@@ -373,7 +373,37 @@ def betterEvaluationFunction(currentGameState):
     DESCRIPTION: <write something here so we know what you did>
     """
     "*** YOUR CODE HERE ***"
-    util.raiseNotDefined()
+    # Useful information you can extract from a GameState (pacman.py)
+    newPos = currentGameState.getPacmanPosition()
+    newFood = currentGameState.getFood()
+    # print("new_food:", newFood)
+    newGhostStates = currentGameState.getGhostStates()
+    newScaredTimes = [ghostState.scaredTimer for ghostState in newGhostStates]
+
+    "*** YOUR CODE HERE ***"
+    newFood = newFood.asList()  # list
+
+    weightOfGhost = 0
+    for G in newGhostStates:
+        ghostPos = G.getPosition()[0], G.getPosition()[1]
+        distance = manhattanDistance(newPos, ghostPos)
+        if distance > 0:
+            if G.scaredTimer > 0:
+                weightOfGhost += 1 / distance
+            else:
+                weightOfGhost -= 1 / distance
+
+    closestFoodDist = sorted(newFood, key=lambda fDist: util.manhattanDistance(fDist, newPos))
+    weightOfFood = 0
+    fd = lambda fDis: util.manhattanDistance(fDis, newPos)
+
+    if len(closestFoodDist) > 0:
+        if fd(closestFoodDist[0]) > 0:
+            weightOfFood = 1 / fd(closestFoodDist[0])
+        else:
+            weightOfFood = 0
+
+    return currentGameState.getScore() + weightOfGhost + weightOfFood
 
 
 # Abbreviation
