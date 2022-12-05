@@ -4,7 +4,7 @@ class Graph:
         self.adj = [[] for i in range(V)]  # adjacency lists
         print('Init adjancency list: ', self.adj)
 
-    def addEdge(self, v, w):     # to add an edge to graph
+    def addEdge (self, v, w):     # to add an edge to graph
         self.adj[v].append(w)    # Add w to v’s list.
 
     # prints all not yet visited vertices reachable from s
