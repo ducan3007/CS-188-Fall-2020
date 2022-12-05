@@ -410,17 +410,27 @@ def cornersHeuristic(state, problem):
     # Sử dụng manhattan distance để tính toán cost dự kiến đi qua tất cả các góc.
     # NearestPoint để xác định góc gần nhất với vị trí hiện tại.
 
+    visited = state[1]
+    curr_state = state[0]
+
     heuristic = 0
-    currentPosition = state[0]
-    cornersList = state[1][:]
-
-    while cornersList != []:
-        nextCorner = nearestPoint(currentPosition, cornersList)
-        manhattanDistance = abs(currentPosition[0] - nextCorner[0]) + abs(currentPosition[1] - nextCorner[1])
-        heuristic += manhattanDistance
-        currentPosition = nextCorner
-        cornersList.remove(nextCorner)
-
+    arr = []
+    if (problem.isGoalState(state)):
+        return 0
+    for i in corners:
+        if i not in visited:
+            arr.append(i)
+    pos = curr_state
+    cost = 999999
+    while len(arr) != 0:
+        for i in arr:
+            if cost > (abs(pos[0] - i[0]) + abs(pos[1] - i[1])):
+                min = i
+                cost = abs(pos[0] - i[0]) + abs(pos[1] - i[1])
+        heuristic += cost
+        pos = min
+        cost = 999999
+        arr.remove(min)
     return heuristic
 
 
