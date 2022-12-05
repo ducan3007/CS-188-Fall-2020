@@ -147,15 +147,10 @@ def depthFirstSearch(problem):
 
 def breadthFirstSearch(problem):
     """Search the shallowest nodes in the search tree first.
-
     Trong BFS, Fringe là một Queue (FIFO).
     Node nào vào trước sẽ được duyệt trước.
-
-
     """
-
     queue = util.Queue()
-
     return commonSearch(problem, queue)
 
 
@@ -197,8 +192,7 @@ def nullHeuristic(state, problem=None):
 
 
 def aStarSearch(problem, heuristic=nullHeuristic):
-   # Chi phí cost của A* được tính bởi chi phí từ startState tới state hiện tại cộng với chi phí dự
-   # đoán từ state hiện tại tới goalState.
+   # Chi phí cost của A* được tính bởi chi phí từ startState tới state hiện tại cộng với chi phí dự đoán từ state hiện tại tới goalState.
     fringe = util.PriorityQueue()
     startState = problem.getStartState()
 
@@ -221,28 +215,20 @@ def aStarSearch(problem, heuristic=nullHeuristic):
     visited = []
 
     while not fringe.isEmpty():
-        import time
-
         # Lấy ra state với chi phí thấp nhất.
         currentState, actionArr = fringe.pop()
 
-        # Nếu state hiện tại là goalState thì trả về đường dẫn tới nó.
         if problem.isGoalState(currentState):
             return actionArr
-
-        # Nếu state hiện tại chưa duyệt thì đánh dấu là đã duyệt (thêm vào mảng visited)
-        # Đồng thời thêm các state liền kề với nó vào fringe.
 
         if currentState not in visited:
             visited.append(currentState)
 
             for nextState, action, cost in problem.getSuccessors(currentState):
                 actionOfNextState = actionArr + [action]
-
                 fringe.push((nextState, actionOfNextState), problem.getCostOfActions(
                     actionOfNextState) + heuristic(nextState, problem))
 
-    # Khi đã duyệt hết state mà không tìm được goalState thì trả về mảng trống
     return []
 
 

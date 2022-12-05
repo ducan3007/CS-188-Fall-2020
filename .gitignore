@@ -7,6 +7,12 @@ __pycache__/
 *.py[cod]
 *$py.class
 
+learn
+
+NHOM13.txt
+
+.venv
+
 # C extensions
 *.so
 .env

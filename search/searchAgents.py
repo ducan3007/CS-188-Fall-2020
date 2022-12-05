@@ -315,14 +315,21 @@ class CornersProblem(search.SearchProblem):
         space)
         """
         "*** YOUR CODE HERE ***"
-        util.raiseNotDefined()
+        # Return tọa độ và danh sách các góc (corner) chưa được ghé thăm
+        return (self.startingPosition, [self.corners[0], self.corners[1], self.corners[2], self.corners[3]])
 
     def isGoalState(self, state):
         """
         Returns whether this search state is a goal state of the problem.
         """
         "*** YOUR CODE HERE ***"
-        util.raiseNotDefined()
+        # state[0] là vị trí hiện tại.
+        # state[1] là danh sách các corner chưa được ghé thăm. Kiểm tra state[1] sẽ biết còn góc nào chưa thăm hay không.
+        # Nếu state[1] trống thì quá trình duyệt qua 4 góc kết thúc.
+        if state[1] == []:
+            return True
+        else:
+            return False
 
     def getSuccessors(self, state):
         """
@@ -345,6 +352,24 @@ class CornersProblem(search.SearchProblem):
             #   hitsWall = self.walls[nextx][nexty]
 
             "*** YOUR CODE HERE ***"
+
+            x, y = state[0]
+
+            # Vị trí tiếp theo
+            dx, dy = Actions.directionToVector(action)
+            nextx, nexty = int(x + dx), int(y + dy)
+            nextPosition = (nextx, nexty)
+
+            # Kiểm tra vị trí tiếp theo có hợp lệ hay không (không phải tường)
+            hitsWall = self.walls[nextx][nexty]
+            if not hitsWall:
+                # Nếu vị trí đó là một góc thì xóa góc đó khỏi danh sách góc chưa thăm.
+                if nextPosition in state[1]:
+                    cornersList = state[1][:]
+                    cornersList.remove(nextPosition)
+                    successors.append(((nextPosition, cornersList), action, 1))
+                else:
+                    successors.append(((nextPosition, state[1]), action, 1))
 
         self._expanded += 1  # DO NOT CHANGE
         return successors
@@ -382,7 +407,34 @@ def cornersHeuristic(state, problem):
     walls = problem.walls  # These are the walls of the maze, as a Grid (game.py)
 
     "*** YOUR CODE HERE ***"
-    return 0  # Default to trivial solution
+    # Sử dụng manhattan distance để tính toán cost dự kiến đi qua tất cả các góc.
+    # NearestPoint để xác định góc gần nhất với vị trí hiện tại.
+
+    heuristic = 0
+    currentPosition = state[0]
+    cornersList = state[1][:]
+
+    while cornersList != []:
+        nextCorner = nearestPoint(currentPosition, cornersList)
+        manhattanDistance = abs(currentPosition[0] - nextCorner[0]) + abs(currentPosition[1] - nextCorner[1])
+        heuristic += manhattanDistance
+        currentPosition = nextCorner
+        cornersList.remove(nextCorner)
+
+    return heuristic
+
+
+def nearestPoint(currentPoint, listPoint):
+    if len(listPoint) == 0:
+        return None
+    nearestPoint = listPoint[0]
+    minDistance = abs(nearestPoint[0] - currentPoint[0]) + abs(nearestPoint[1] - currentPoint[1])
+    for temp in listPoint[1:]:
+        distance = abs(temp[0] - currentPoint[0]) + abs(temp[1] - currentPoint[1])
+        if (distance > minDistance):
+            minDistance = distance
+            nearestPoint = temp
+    return nearestPoint
 
 
 class AStarCornersAgent(SearchAgent):
@@ -483,7 +535,13 @@ def foodHeuristic(state, problem):
     """
     position, foodGrid = state
     "*** YOUR CODE HERE ***"
-    return 0
+    foodList = foodGrid.asList()  # Chuyển từ grid sang list.
+    if len(foodList) == 0:
+        return 0
+    nearestFood = nearestPoint(position, foodList)
+    manhattanDistance = abs(nearestFood[0] - position[0]) + abs(nearestFood[1] - position[1])
+    heuristic = manhattanDistance + len(foodList)
+    return heuristic
 
 
 class ClosestDotSearchAgent(SearchAgent):
@@ -516,7 +574,7 @@ class ClosestDotSearchAgent(SearchAgent):
         problem = AnyFoodSearchProblem(gameState)
 
         "*** YOUR CODE HERE ***"
-        util.raiseNotDefined()
+        return search.aStarSearch(problem)
 
 
 class AnyFoodSearchProblem(PositionSearchProblem):
@@ -553,7 +611,7 @@ class AnyFoodSearchProblem(PositionSearchProblem):
         x, y = state
 
         "*** YOUR CODE HERE ***"
-        util.raiseNotDefined()
+        return self.food[x][y]
 
 
 def mazeDistance(point1, point2, gameState):
