@@ -390,48 +390,44 @@ class CornersProblem(search.SearchProblem):
         return len(actions)
 
 
+def manhattan(x1, y1, x2, y2): return abs(x1 - x2) + abs(y1 - y2)
+
+
 def cornersHeuristic(state, problem):
     """
     A heuristic for the CornersProblem that you defined.
-
       state:   The current search state
                (a data structure you chose in your search problem)
-
       problem: The CornersProblem instance for this layout.
-
     This function should always return a number that is a lower bound on the
     shortest path from the state to a goal of the problem; i.e.  it should be
     admissible (as well as consistent).
     """
-    corners = problem.corners  # These are the corner coordinates
-    walls = problem.walls  # These are the walls of the maze, as a Grid (game.py)
+    corners = state[1][:]  # list các góc
+    walls = problem.walls  # mảng các tường
 
-    "*** YOUR CODE HERE ***"
-    # Sử dụng manhattan distance để tính toán cost dự kiến đi qua tất cả các góc.
-    # NearestPoint để xác định góc gần nhất với vị trí hiện tại.
+    h = 0
+    reference = state[0]  # set the reference point to the current position
 
-    visited = state[1]
-    curr_state = state[0]
+    # lặp lại khi vẫn còn góc chưa đi
+    while corners != []:
+        # lấy tọa độ từ reference
+        x2, y2 = reference
 
-    heuristic = 0
-    arr = []
-    if (problem.isGoalState(state)):
-        return 0
-    for i in corners:
-        if i not in visited:
-            arr.append(i)
-    pos = curr_state
-    cost = 999999
-    while len(arr) != 0:
-        for i in arr:
-            if cost > (abs(pos[0] - i[0]) + abs(pos[1] - i[1])):
-                min = i
-                cost = abs(pos[0] - i[0]) + abs(pos[1] - i[1])
-        heuristic += cost
-        pos = min
-        cost = 999999
-        arr.remove(min)
-    return heuristic
+        # khởi tạo mảng chứa khoảng cách
+        distances = []
+
+        # duyệt tất cả các góc còn lại
+        for x1, y1 in corners:
+            # tìm khoảng cách từ reference đến góc
+            distances.append(manhattan(x1, y1, x2, y2))
+        h += min(distances)
+        # đặt reference gần nhất với reference hiện tại
+        reference = corners[distances.index(min(distances))]
+        corners.remove(reference)
+
+    # trả về h
+    return h
 
 
 def nearestPoint(currentPoint, listPoint):
@@ -545,13 +541,8 @@ def foodHeuristic(state, problem):
     """
     position, foodGrid = state
     "*** YOUR CODE HERE ***"
-    foodList = foodGrid.asList()  # Chuyển từ grid sang list.
-    if len(foodList) == 0:
-        return 0
-    nearestFood = nearestPoint(position, foodList)
-    manhattanDistance = abs(nearestFood[0] - position[0]) + abs(nearestFood[1] - position[1])
-    heuristic = manhattanDistance + len(foodList)
-    return heuristic
+    # return 0
+    return len(foodGrid.asList())
 
 
 class ClosestDotSearchAgent(SearchAgent):

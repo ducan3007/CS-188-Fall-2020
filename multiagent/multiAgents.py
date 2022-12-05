@@ -4,7 +4,7 @@
 # educational purposes provided that (1) you do not distribute or publish
 # solutions, (2) you retain this notice, and (3) you provide clear
 # attribution to UC Berkeley, including a link to http://ai.berkeley.edu.
-#
+# 
 # Attribution Information: The Pacman AI projects were developed at UC Berkeley.
 # The core projects and autograders were primarily created by John DeNero
 # (denero@cs.berkeley.edu) and Dan Klein (klein@cs.berkeley.edu).
@@ -14,12 +14,9 @@
 
 from util import manhattanDistance
 from game import Directions
-import random
-import util
-import json
+import random, util
 
 from game import Agent
-
 
 class ReflexAgent(Agent):
     """
@@ -30,6 +27,7 @@ class ReflexAgent(Agent):
     it in any way you see fit, so long as you don't touch our method
     headers.
     """
+
 
     def getAction(self, gameState):
         """
@@ -47,7 +45,7 @@ class ReflexAgent(Agent):
         scores = [self.evaluationFunction(gameState, action) for action in legalMoves]
         bestScore = max(scores)
         bestIndices = [index for index in range(len(scores)) if scores[index] == bestScore]
-        chosenIndex = random.choice(bestIndices)  # Pick randomly among the best
+        chosenIndex = random.choice(bestIndices) # Pick randomly among the best
 
         "Add more of your code here if you want to"
 
@@ -62,7 +60,6 @@ class ReflexAgent(Agent):
 
         The code below extracts some useful information from the state, like the
         remaining food (newFood) and Pacman position after moving (newPos).
-
         newScaredTimes holds the number of moves that each ghost will remain
         scared because of Pacman having eaten a power pellet.
 
@@ -70,56 +67,42 @@ class ReflexAgent(Agent):
         to create a masterful evaluation function.
         """
         # Useful information you can extract from a GameState (pacman.py)
+        # Lấy successorGamState dựa trên currentGameState và action.
+        # [Trạng thái game mới được xác định bởi trạng thái game hiện tại và hành động của pacman]
         successorGameState = currentGameState.generatePacmanSuccessor(action)
-
-        # _x = successorGameState.layout.width
-        # _y = successorGameState.layout.height
-
-        # print("x: ", _x, "y: ", _y)
-
+        # Vị trí mới của pacman sau khi thực hiện action.
         newPos = successorGameState.getPacmanPosition()
-        newFood = successorGameState.getFood().asList()
-        newGhostStates = successorGameState.getGhostStates()
-        newScaredTimes = [ghostState.scaredTimer for ghostState in newGhostStates]
-
+        # Trạng thái mới của grid thức ăn sau khi pacman thực hiện action.
         newFood = successorGameState.getFood()
-
         newFood = newFood.asList()
-
         # Trạng thái của các con ma sau đó.
         newGhostStates = successorGameState.getGhostStates()
         ghostPosition = []
         for ghostState in newGhostStates:
             ghostPosition.append((ghostState.getPosition()[0], ghostState.getPosition()[1]))
-
         # Các con ma sẽ rơi vào trạng thái sợ hãi khi pacman ăn viên năng lượng.
         # newScaredTimes là thời gian sợ hãi còn lại của các con ma.
         newScaredTimes = [ghostState.scaredTimer for ghostState in newGhostStates]
+        # print("successorGameState ", successorGameState)
+        # print("newPos ", newPos)
+        # print("newFood ", newFood)
+        # print("newGhostStates ", newGhostStates)
+        # print("newScaredTimes ", newScaredTimes)
 
         "*** YOUR CODE HERE ***"
-
         # Đây là hàm đánh giá về một action dựa trên currentGameState. Dựa vào đây pacman sẽ lựa chọn phương hướng (action)
         # có điểm cao nhất. Nếu có nhiều action bằng điểm nhau thì lựa chọn ngẫu nhiên một trong số đó.
 
         # Đầu tiên, tệ nhất là con ma đang không sợ hãi và vị trí mới của pacman trùng với vị trí của con ma.
         if min(newScaredTimes) == 0 and newPos in ghostPosition:
             return -1.0
-
         # Nếu có thức ăn mà không có ma hoặc ma đang trong tình trạng hoảng sợ thì trả về giá trị cao nhất.
         if newPos in currentGameState.getFood().asList():
-            return 99
-
+            return 1.0
         # Nếu không thuộc hai trường hợp trên ta sẽ đánh giá dựa vào vị trí của thức ăn gần nhất và con ma gần nhất.
         # So sánh dựa trên manhattan distance
 
         # Tìm khoảng cách tới thức ăn gần nhất.
-        minDistanceToFood = 9999
-        for food in newFood:
-            temp = util.manhattanDistance(newPos, food)
-            if temp < minDistanceToFood:
-                minDistanceToFood = temp
-
-        # Tìm khoảng cách tới con ma gần nhất.
         minDistanceToFood = 9999
         for food in newFood:
             temp = util.manhattanDistance(newPos, food)
@@ -132,9 +115,7 @@ class ReflexAgent(Agent):
             if temp < minDistanceToGhost:
                 minDistanceToGhost = temp
         score = 1.0/minDistanceToFood - 1.0/minDistanceToGhost
-
         return score
-
 
 def scoreEvaluationFunction(currentGameState):
     """
@@ -145,7 +126,6 @@ def scoreEvaluationFunction(currentGameState):
     (not reflex agents).
     """
     return currentGameState.getScore()
-
 
 class MultiAgentSearchAgent(Agent):
     """
@@ -162,11 +142,10 @@ class MultiAgentSearchAgent(Agent):
     is another abstract class.
     """
 
-    def __init__(self, evalFn='scoreEvaluationFunction', depth='2'):
-        self.index = 0  # Pacman is always agent index 0
+    def __init__(self, evalFn = 'scoreEvaluationFunction', depth = '2'):
+        self.index = 0 # Pacman is always agent index 0
         self.evaluationFunction = util.lookup(evalFn, globals())
         self.depth = int(depth)
-
 
 class MinimaxAgent(MultiAgentSearchAgent):
     """
@@ -197,40 +176,44 @@ class MinimaxAgent(MultiAgentSearchAgent):
         Returns whether or not the game state is a losing state
         """
         "*** YOUR CODE HERE ***"
-        bestAction, socore = self.minimax(self, gameState, 0, 0)
+        # Đây là hàm trả về action tối ưu nhất cho agent dựa trên thuật toán minimax.
+        # Trong đó, pacman tượng trưng cho max và ghost tượng trưng cho min.
+        bestAction, socore = minimax(self, gameState, 0, 0)
         return bestAction
 
-    def minimax(self, gameState, agentIndex, depth):
-        bestAction = None
-        # Kiểm tra điều kiện dừng của thuật toán.
-        if gameState.isLose() or gameState.isWin() or depth >= self.depth:
-            return bestAction, self.evaluationFunction(gameState)
-        score = 99999
-        if agentIndex == 0:
-            score = -99999
+def minimax(self, gameState, agentIndex, depth):
+    bestAction = None
+    # Kiểm tra điều kiện dừng của thuật toán.
+    if gameState.isLose() or gameState.isWin() or depth >= self.depth:
+        return bestAction, self.evaluationFunction(gameState)
+    score = 99999
+    if agentIndex == 0:
+        score = -99999
 
-        actions = gameState.getLegalActions(agentIndex)
-        # Duyệt để tính điểm cho toàn bộ các hướng đi (action).
-        for action in actions:
-            nextState = gameState.generateSuccessor(agentIndex, action)
-            if agentIndex == 0:  # Pac man - max agent
-                nextAction, nextScore = self.minimax(self, nextState, agentIndex + 1, depth)
-                if nextScore > score:
-                    score = nextScore
-                    bestAction = action
+    # Lấy toàn bộ hướng đi hiện tại của agent
+    actions = gameState.getLegalActions(agentIndex)
+    # Duyệt để tính điểm cho toàn bộ các hướng đi (action).
+    # Đối với Pacman có agentIndex = 0, ta lựa chọn hướng đi có điểm cao nhất (max).
+    # Đối với Ghost có agentIndex > 0, ta lựa chọn hướng đi có điểm thấp nhất (min).
+    for action in actions:
+        nextState = gameState.generateSuccessor(agentIndex, action)
+        if agentIndex == 0: #Pac man - max agent
+            nextAction, nextScore = minimax(self, nextState, agentIndex + 1, depth)
+            if nextScore > score:
+                score = nextScore
+                bestAction = action
+        else:
+            if agentIndex == gameState.getNumAgents() - 1:
+                nextAgentIndex = 0
+                nextDepth = depth + 1
             else:
-                if agentIndex == gameState.getNumAgents() - 1:
-                    nextAgentIndex = 0
-                    nextDepth = depth + 1
-                else:
-                    nextAgentIndex = agentIndex + 1
-                    nextDepth = depth
-                nextAction, nextScore = self.minimax(self, nextState, nextAgentIndex, nextDepth)
-                if nextScore < score:
-                    score = nextScore
-                    bestAction = action
-        return bestAction, score
-
+                nextAgentIndex = agentIndex + 1
+                nextDepth = depth
+            nextAction, nextScore = minimax(self, nextState, nextAgentIndex, nextDepth)
+            if nextScore < score:
+                score = nextScore
+                bestAction = action
+    return bestAction, score
 
 class AlphaBetaAgent(MultiAgentSearchAgent):
     """
@@ -244,7 +227,6 @@ class AlphaBetaAgent(MultiAgentSearchAgent):
         "*** YOUR CODE HERE ***"
         bestAction, socore = alphaBeta(self, gameState, 0, 0, -99999, 99999)
         return bestAction
-
 
 def alphaBeta(self, gameState, agentIndex, depth, alpha, beta):
     bestAction = None
@@ -288,7 +270,6 @@ def alphaBeta(self, gameState, agentIndex, depth, alpha, beta):
                 return bestAction, score
     return bestAction, score
 
-
 class ExpectimaxAgent(MultiAgentSearchAgent):
     """
       Your expectimax agent (question 4)
@@ -305,7 +286,6 @@ class ExpectimaxAgent(MultiAgentSearchAgent):
         bestAction, socore = expectimax(self, gameState, 0, 0)
         return bestAction
 
-
 def expectimax(self, gameState, agentIndex, depth):
     bestAction = None
     # Kiểm tra điều kiện dừng của thuật toán.
@@ -318,8 +298,8 @@ def expectimax(self, gameState, agentIndex, depth):
     # Lấy toàn bộ hướng đi hiện tại của agent
     actions = gameState.getLegalActions(agentIndex)
     # Duyệt để tính điểm cho toàn bộ các hướng đi (action).
-    # Nếu agentIndex = 0, => điểm cao nhất (max).
-    # Nếu Ghost có agentIndex > 0, => điểm thấp nhất (min).
+    # Đối với Pacman có agentIndex = 0, ta lựa chọn hướng đi có điểm cao nhất (max).
+    # Đối với Ghost có agentIndex > 0, ta lựa chọn hướng đi có điểm thấp nhất (min).
     for action in actions:
         nextState = gameState.generateSuccessor(agentIndex, action)
         if agentIndex == 0:  # Pac man - max agent
@@ -339,7 +319,6 @@ def expectimax(self, gameState, agentIndex, depth):
             score += nextScore * probability
     return bestAction, score
 
-
 def betterEvaluationFunction(currentGameState):
     """
     Your extreme ghost-hunting, pellet-nabbing, food-gobbling, unstoppable
@@ -348,40 +327,30 @@ def betterEvaluationFunction(currentGameState):
     DESCRIPTION: <write something here so we know what you did>
     """
     "*** YOUR CODE HERE ***"
-    # Useful information you can extract from a GameState (pacman.py)
     newPos = currentGameState.getPacmanPosition()
     newFood = currentGameState.getFood()
-    # print("new_food:", newFood)
-
-    # trạng thái mới của con ma
+    newFood = newFood.asList()
     newGhostStates = currentGameState.getGhostStates()
+    capsules = currentGameState.getCapsules()
+    ghostPosition = []
+    for ghostState in newGhostStates:
+        ghostPosition.append((ghostState.getPosition()[0], ghostState.getPosition()[1]))
+
+    # Các con ma sẽ rơi vào trạng thái sợ hãi khi pacman ăn viên năng lượng.
     # newScaredTimes là thời gian sợ hãi còn lại của các con ma.
     newScaredTimes = [ghostState.scaredTimer for ghostState in newGhostStates]
 
-    "*** YOUR CODE HERE ***"
-    newFood = newFood.asList()  # list
+    # Đầu tiên, tệ nhất là con ma đang không sợ hãi và vị trí mới của pacman trùng với vị trí của con ma.
+    # Pacman không thể tới vị trí này.
+    if min(newScaredTimes) == 0 and newPos in ghostPosition:
+        return -99999
 
-    weightOfGhost = 0
-    for G in newGhostStates:
-        ghostPos = G.getPosition()[0], G.getPosition()[1]
-        distance = manhattanDistance(newPos, ghostPos)
-        if distance > 0:
-            if G.scaredTimer > 0:
-                weightOfGhost += 1 / distance
-            else:
-                weightOfGhost -= 1 / distance
+    score = currentGameState.getScore()
+    # Tiếp theo, chúng ta sẽ đánh giá score dựa trên mật độ phân bố thức ăn xung quanh vị trí.
+    for food in newFood:
+        score += 1.0 / util.manhattanDistance(newPos, food)
 
-    closestFoodDist = sorted(newFood, key=lambda fDist: util.manhattanDistance(fDist, newPos))
-    weightOfFood = 0
-    def fd(fDis): return util.manhattanDistance(fDis, newPos)
-
-    if len(closestFoodDist) > 0:
-        if fd(closestFoodDist[0]) > 0:
-            weightOfFood = 1 / fd(closestFoodDist[0])
-        else:
-            weightOfFood = 0
-
-    return currentGameState.getScore() + weightOfGhost + weightOfFood
+    return score
 
 
 # Abbreviation
