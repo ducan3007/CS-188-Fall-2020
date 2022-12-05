@@ -7,7 +7,7 @@ b = np.random.rand(10)
 print('a', a)
 print('b', b)
 
-start = time.time()
+start = time. time()
 
 c = np.dot(a, b)
 end = time.time()
