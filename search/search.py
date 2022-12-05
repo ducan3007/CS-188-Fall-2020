@@ -93,26 +93,17 @@ def commonSearch(problem, Fringe):
     visited = []
 
     while not Fringe.isEmpty():
-        import time
-        # time.sleep(1)
-        # Xét state từ fringe
 
         currentState, actionArr = Fringe.pop()
 
-        print('Visited: ', visited)
-        print('currentState: ', currentState)
-
         # Nếu state hiện tại là goalState thì trả về đường dẫn tới nó.
         if problem.isGoalState(currentState):
-            print('AAAAAAAAAAAAA: ', currentState)
+
             return actionArr
 
         # Nếu state hiện tại chưa duyệt thì đánh dấu là đã duyệt (thêm vào mảng visited)
         # Đồng thời thêm các state liền kề với nó vào fringe.
         # Ngược lại, sate đã duyệt sẽ được bỏ qua.
-
-        if currentState in visited:
-            print('-> VISITED: ', currentState)
 
         if currentState not in visited:
             # đánh dấu là đã duyệt
@@ -122,7 +113,6 @@ def commonSearch(problem, Fringe):
             successors = problem.getSuccessors(currentState)
 
             for nextSate, action, cost in successors:
-                print('Add: ', nextSate)
                 # Đường đi từ startState đến nextState (successor) bằng tổng đường đi từ start đến current và current đến next
                 actionOfNextState = actionArr + [action]
                 Fringe.push((nextSate, actionOfNextState))
@@ -170,10 +160,6 @@ def breadthFirstSearch(problem):
 
 
 def uniformCostSearch(problem):
-    # biến để log
-    po = []
-    priority = dict()
-
     '''
     Cấu trúc dữ liệu chính là một PriorityQueue.
     Mỗi phần tử trong PriorityQueue là một tuple ((node, actions[ from node to startState ]), actionsCost)
@@ -184,18 +170,11 @@ def uniformCostSearch(problem):
     startState = problem.getStartState()
     prorityQueue.push((startState, []), problem.getCostOfActions([]))
 
-    po.append([(startState, []), problem.getCostOfActions([])])
     visited = []
 
     while not prorityQueue.isEmpty():
-        '''
-            B1: Lấy state và actions có độ ưu tiên cao nhất 
-            mảng actions chính là output của thuật toán cho dugf có  
-        '''
-        currentState, actionArr = prorityQueue.pop()
 
-        if currentState in visited:
-            print('-> VISITED: ', currentState)
+        currentState, actionArr = prorityQueue.pop()
 
         if problem.isGoalState(currentState):
             return actionArr
@@ -205,10 +184,6 @@ def uniformCostSearch(problem):
             for nextSate, action, cost in problem.getSuccessors(currentState):
                 actionOfNextState = actionArr + [action]
                 prorityQueue.push((nextSate, actionOfNextState), problem.getCostOfActions(actionOfNextState))
-
-                # print('Add: ', currentState, nextSate, problem.getCostOfActions(actionOfNextState))
-
-                po.append([(nextSate, actionOfNextState), problem.getCostOfActions(actionOfNextState)])
 
     return []
 
@@ -258,15 +233,11 @@ def aStarSearch(problem, heuristic=nullHeuristic):
         # Nếu state hiện tại chưa duyệt thì đánh dấu là đã duyệt (thêm vào mảng visited)
         # Đồng thời thêm các state liền kề với nó vào fringe.
 
-        print('fn', heuristic)
-
         if currentState not in visited:
             visited.append(currentState)
 
             for nextState, action, cost in problem.getSuccessors(currentState):
                 actionOfNextState = actionArr + [action]
-
-                print('Heuristic: ', nextState, heuristic(nextState, problem))
 
                 fringe.push((nextState, actionOfNextState), problem.getCostOfActions(
                     actionOfNextState) + heuristic(nextState, problem))
