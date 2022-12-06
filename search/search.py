@@ -74,7 +74,7 @@ def tinyMazeSearch(problem):
     return [s, s, w, s, w, w, s, w]
 
 
-def commonSearch(problem, Fringe):
+def searchCommon(problem, Fringe):
     # Fringe (rìa) được hiểu là một cấu trúc dữ liệu, lưu trưu các node sẽ được duyệt (rìa - nằm ở rìa của cây tìm kiếm, các nút tiếp theo)
     # Các node sẽ được thêm vào dần dần.
     # Các Node có thể trùng lặp.
@@ -89,7 +89,7 @@ def commonSearch(problem, Fringe):
     # Push startState vào fringe. StartState là vị trí ban đầu nên đường đi đến chính nó là một mảng rỗng.
     Fringe.push((startState, []))
 
-    # Các state đã từng duyệt sẽ được lưu trong mảng visited, đảm bảo không duyệt lại.
+    # Các state đã từng duyệt sẽ được lưu trong mảng visted đảm bảo không bị duyệt lại.
     visited = []
 
     while not Fringe.isEmpty():
@@ -103,7 +103,7 @@ def commonSearch(problem, Fringe):
 
         # Nếu state hiện tại chưa duyệt thì đánh dấu là đã duyệt (thêm vào mảng visited)
         # Đồng thời thêm các state liền kề với nó vào fringe.
-        # Ngược lại, sate đã duyệt sẽ được bỏ qua.
+        # Ngược lại, state đã duyệt sẽ được bỏ qua.
 
         if currentState not in visited:
             # đánh dấu là đã duyệt
@@ -117,7 +117,7 @@ def commonSearch(problem, Fringe):
                 actionOfNextState = actionArr + [action]
                 Fringe.push((nextSate, actionOfNextState))
 
-    # Khi đã duyệt hết state mà không tìm được goalState thì trả về mảng trống
+    # Nếu đã đi hết state mà không tìm được goalState thì trả về mảng trống
     return []
 
 
@@ -140,9 +140,9 @@ def depthFirstSearch(problem):
     """
 
     "*** YOUR CODE HERE ***"
-
+    # Trong DFS, CTDL sử dụng là Stack (LIFO)
     stack = util.Stack()
-    return commonSearch(problem, stack)
+    return searchCommon(problem, stack)
 
 
 def breadthFirstSearch(problem):
@@ -150,19 +150,28 @@ def breadthFirstSearch(problem):
     Trong BFS, Fringe là một Queue (FIFO).
     Node nào vào trước sẽ được duyệt trước.
     """
+    # Trong BFS, CTDL sử dụng là Queue (FIFO)
     queue = util.Queue()
-    return commonSearch(problem, queue)
+    return searchCommon(problem, queue)
 
 
 def uniformCostSearch(problem):
     '''
+    Tương tự các thuật toán trước
     Cấu trúc dữ liệu chính là một PriorityQueue.
     Mỗi phần tử trong PriorityQueue là một tuple ((node, actions[ from node to startState ]), actionsCost)
+
+
+
     '''
+    # Trong UCS, CTDL sử dụng là PriorityQueue, sẽ lưu các thêm cost(chi phí) để có thể đi từ
+    # start đến state hiện tại. State có chi phí thấp sẽ được đưa ra khỏi hàng dợi
 
     prorityQueue = util.PriorityQueue()
 
     startState = problem.getStartState()
+
+    # Push startState và PQ, với cost lấy từ getCostOfActions
     prorityQueue.push((startState, []), problem.getCostOfActions([]))
 
     visited = []
@@ -177,6 +186,8 @@ def uniformCostSearch(problem):
         if currentState not in visited:
             visited.append(currentState)
             for nextSate, action, cost in problem.getSuccessors(currentState):
+                # Đường đi từ startState đến nextState (successor) bằng tổng đường đi từ start đến current và current đến next
+
                 actionOfNextState = actionArr + [action]
                 prorityQueue.push((nextSate, actionOfNextState), problem.getCostOfActions(actionOfNextState))
 

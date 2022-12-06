@@ -4,7 +4,7 @@
 # educational purposes provided that (1) you do not distribute or publish
 # solutions, (2) you retain this notice, and (3) you provide clear
 # attribution to UC Berkeley, including a link to http://ai.berkeley.edu.
-# 
+#
 # Attribution Information: The Pacman AI projects were developed at UC Berkeley.
 # The core projects and autograders were primarily created by John DeNero
 # (denero@cs.berkeley.edu) and Dan Klein (klein@cs.berkeley.edu).
@@ -14,9 +14,11 @@
 
 from util import manhattanDistance
 from game import Directions
-import random, util
+import random
+import util
 
 from game import Agent
+
 
 class ReflexAgent(Agent):
     """
@@ -27,7 +29,6 @@ class ReflexAgent(Agent):
     it in any way you see fit, so long as you don't touch our method
     headers.
     """
-
 
     def getAction(self, gameState):
         """
@@ -45,7 +46,7 @@ class ReflexAgent(Agent):
         scores = [self.evaluationFunction(gameState, action) for action in legalMoves]
         bestScore = max(scores)
         bestIndices = [index for index in range(len(scores)) if scores[index] == bestScore]
-        chosenIndex = random.choice(bestIndices) # Pick randomly among the best
+        chosenIndex = random.choice(bestIndices)  # Pick randomly among the best
 
         "Add more of your code here if you want to"
 
@@ -117,6 +118,7 @@ class ReflexAgent(Agent):
         score = 1.0/minDistanceToFood - 1.0/minDistanceToGhost
         return score
 
+
 def scoreEvaluationFunction(currentGameState):
     """
     This default evaluation function just returns the score of the state.
@@ -126,6 +128,7 @@ def scoreEvaluationFunction(currentGameState):
     (not reflex agents).
     """
     return currentGameState.getScore()
+
 
 class MultiAgentSearchAgent(Agent):
     """
@@ -142,10 +145,11 @@ class MultiAgentSearchAgent(Agent):
     is another abstract class.
     """
 
-    def __init__(self, evalFn = 'scoreEvaluationFunction', depth = '2'):
-        self.index = 0 # Pacman is always agent index 0
+    def __init__(self, evalFn='scoreEvaluationFunction', depth='2'):
+        self.index = 0  # Pacman is always agent index 0
         self.evaluationFunction = util.lookup(evalFn, globals())
         self.depth = int(depth)
+
 
 class MinimaxAgent(MultiAgentSearchAgent):
     """
@@ -181,6 +185,7 @@ class MinimaxAgent(MultiAgentSearchAgent):
         bestAction, socore = minimax(self, gameState, 0, 0)
         return bestAction
 
+
 def minimax(self, gameState, agentIndex, depth):
     bestAction = None
     # Kiểm tra điều kiện dừng của thuật toán.
@@ -197,7 +202,7 @@ def minimax(self, gameState, agentIndex, depth):
     # Đối với Ghost có agentIndex > 0, ta lựa chọn hướng đi có điểm thấp nhất (min).
     for action in actions:
         nextState = gameState.generateSuccessor(agentIndex, action)
-        if agentIndex == 0: #Pac man - max agent
+        if agentIndex == 0:  # Pac man - max agent
             nextAction, nextScore = minimax(self, nextState, agentIndex + 1, depth)
             if nextScore > score:
                 score = nextScore
@@ -215,6 +220,7 @@ def minimax(self, gameState, agentIndex, depth):
                 bestAction = action
     return bestAction, score
 
+
 class AlphaBetaAgent(MultiAgentSearchAgent):
     """
     Your minimax agent with alpha-beta pruning (question 3)
@@ -227,6 +233,7 @@ class AlphaBetaAgent(MultiAgentSearchAgent):
         "*** YOUR CODE HERE ***"
         bestAction, socore = alphaBeta(self, gameState, 0, 0, -99999, 99999)
         return bestAction
+
 
 def alphaBeta(self, gameState, agentIndex, depth, alpha, beta):
     bestAction = None
@@ -270,6 +277,7 @@ def alphaBeta(self, gameState, agentIndex, depth, alpha, beta):
                 return bestAction, score
     return bestAction, score
 
+
 class ExpectimaxAgent(MultiAgentSearchAgent):
     """
       Your expectimax agent (question 4)
@@ -285,6 +293,7 @@ class ExpectimaxAgent(MultiAgentSearchAgent):
         "*** YOUR CODE HERE ***"
         bestAction, socore = expectimax(self, gameState, 0, 0)
         return bestAction
+
 
 def expectimax(self, gameState, agentIndex, depth):
     bestAction = None
@@ -318,6 +327,7 @@ def expectimax(self, gameState, agentIndex, depth):
             probability = 1.0 / len(actions)
             score += nextScore * probability
     return bestAction, score
+
 
 def betterEvaluationFunction(currentGameState):
     """
