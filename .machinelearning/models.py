@@ -54,7 +54,7 @@ class RegressionModel(object):
         "*** YOUR CODE HERE ***"
 
         self.hlayer1 = 50
-        self.w1 = nn.Parameter(1, self.hlayer1)
+        self.w1 = nn.Parameter(1,  self.hlayer1)
         self.b1 = nn.Parameter(1, self.hlayer1)
 
         self.hlayer2 = 30
